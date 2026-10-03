@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}My Space — CogniCare NER{% endblock %}
+{% block content %}
+<section class="dashboard-head">
+  <div>
+    <div class="eyebrow"><span class="pulse"></span> YOUR PLAY SPACE</div>
+    <h1>Hello, <span class="gradient-text">{{ user.first_name|default:user.username }}</span> 👋</h1>
+    <p class="muted">Choose one little activity. There is no rush.</p>
+  </div>
+  <div class="ai-badge"><span>✦</span><div><b>Adaptive play</b><small>Decision Tree enabled</small></div></div>
+</section>
+
+<section class="stats-grid">
+  <div class="stat-card stat-lav"><span class="stat-icon">🏆</span><div><small>Sessions completed</small><strong id="totalSessions">{{ sessions|length }}</strong><em>Every session counts</em></div><i>↗</i></div>
+  <div class="stat-card stat-mint"><span class="stat-icon">⭐</span><div><small>Average game score</small><strong id="averageScore">—</strong><em>Engagement only</em></div><i>✦</i></div>
+  <div class="stat-card stat-peach"><span class="stat-icon">⏰</span><div><small>Active reminders</small><strong>{{ reminders|length }}</strong><em>Keep your routine close</em></div><i>♡</i></div>
+</section>
+
+<section class="dashboard-grid">
+  <div class="panel play-panel">
+    <div class="panel-heading">
+      <div><span class="eyebrow">GAME ZONE</span><h2>Pick your mini mission</h2></div>
+      <span class="pill pill-green">● AI adaptive</span>
+    </div>
+    <div class="activity-grid">
+      <button class="activity-tile tile-memory" id="startGame"><span class="activity-art">🧠</span><b>Memory & thinking</b><small>7 quick questions</small><span class="tile-arrow">Play now <strong>→</strong></span></button>
+      <button class="activity-tile tile-photo" id="photoGame"><span class="activity-art">📸</span><b>Family photo memory</b><small>Local photo prompt</small><span class="tile-arrow">Open <strong>→</strong></span></button>
+      <button class="activity-tile tile-voice" id="voiceHelp"><span class="activity-art">🔊</span><b>Voice assistance</b><small>Hear the welcome</small><span class="tile-arrow">Listen <strong>→</strong></span></button>
+    </div>
+
+    <div class="game-box hidden" id="gameBox">
+      <div class="game-top"><span class="pill" id="domainPill">MEMORY</span><span id="questionCount">Question 1 of 7</span></div>
+      <div class="question-progress"><span id="questionProgress"></span></div>
+      <div class="question-orb">✦</div>
+      <h3 id="questionText">Loading your activity…</h3>
+      <div id="hintText" class="hint-text hidden"></div>
+      <div id="answerOptions" class="answer-options"></div>
+      <div class="game-actions"><button class="btn btn-soft" id="hintButton">💡 Hint</button><button class="btn btn-quiet" id="readQuestion">🔊 Read aloud</button><button class="btn btn-primary" id="finishGame">Finish & save</button></div>
+      <p id="gameFeedback" class="game-feedback" aria-live="polite"></p>
+      <div class="ai-note"><span>✦</span><div><b>Adaptive engine</b><small id="adaptationText">The next activity will respond to your recent answers.</small></div></div>
+    </div>
+
+    <div class="photo-box hidden" id="photoBox">
+      <div class="photo-title"><span>📸</span><div><b>Family photo memory</b><small>A private local prompt</small></div></div>
+      <p class="muted">Choose an image from this device. The prototype previews it locally and does not upload it.</p>
+      <label class="upload-zone" for="photoInput"><span>＋</span><b>Choose a photo</b><small>JPG, PNG or another image</small></label>
+      <input type="file" id="photoInput" accept="image/*" hidden>
+      <img id="photoPreview" class="photo-preview hidden" alt="Selected family photo preview">
+      <button class="btn btn-outline" id="closePhoto">← Back to activities</button>
+    </div>
+  </div>
+
+  <div class="panel reminders-panel">
+    <div class="panel-heading"><div><span class="eyebrow">DAILY BUBBLES</span><h2>Helpful reminders</h2></div><span class="round-icon">⏰</span></div>
+    <div class="reminder-list">
+      {% for r in reminders %}
+      <div class="reminder-item"><span class="reminder-check">✓</span><div><b>{{ r.title }}</b><small>{{ r.reminder_type }}{% if r.notes %} · {{ r.notes }}{% endif %}</small></div><span class="reminder-dot"></span></div>
+      {% empty %}<p class="muted empty-note">No reminders yet. Add your first little prompt below.</p>{% endfor %}
+    </div>
+    <form id="reminderForm" class="reminder-form"><input id="reminderTitle" placeholder="e.g. Drink water" maxlength="150" required><select id="reminderType"><option>Daily routine</option><option>Medicine</option><option>Cognitive activity</option><option>Appointment</option></select><button class="btn btn-primary" type="submit">＋ Add</button></form>
+    <p class="tiny-note">Browser notifications are not enabled in this demo.</p>
+  </div>
+</section>
+
+<section class="panel history-panel">
+  <div class="panel-heading"><div><span class="eyebrow">YOUR JOURNEY</span><h2>Progress garden</h2></div><a class="btn btn-outline" href="/api/report.pdf">Export report ↓</a></div>
+  <div class="chart-card"><div class="chart-heading"><span>Game score over time</span><span class="pill">0–100%</span></div><div class="chart-wrap"><canvas id="progressChart"></canvas></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Date</th><th>Questions</th><th>Score</th><th>Hints</th></tr></thead><tbody id="historyRows">
+  {% for s in sessions %}<tr><td>{{ s.started_at|date:"d M Y, H:i" }}</td><td>{{ s.total_questions }}</td><td><span class="score-pill">{{ s.score_percent }}%</span></td><td>{{ s.hints_used }}</td></tr>{% empty %}<tr><td colspan="4" class="empty-cell">Complete your first session and it will bloom here ✦</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+window.COGNI_CONFIG = { analyticsUrl: "/api/analytics/", questionsUrl: "/api/questions/", startUrl: "/api/sessions/start/", answerUrl: "/api/sessions/answer/", finishUrl: "/api/sessions/finish/", remindersUrl: "/api/reminders/" };
+</script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

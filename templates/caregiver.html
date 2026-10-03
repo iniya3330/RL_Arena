@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Caregiver Space — CogniCare NER{% endblock %}
+{% block content %}
+<section class="dashboard-head">
+  <div><div class="eyebrow">CAREGIVER SPACE</div><h1>People & <span class="gradient-text">progress</span> ✦</h1><p class="muted">A simple demo overview of fictional patient accounts and game engagement.</p></div>
+  <a class="btn btn-outline" href="/dashboard/">Patient view →</a>
+</section>
+<div class="caregiver-grid">
+  <div class="panel">
+    <div class="panel-heading"><div><span class="eyebrow">DEMO PATIENTS</span><h2>Registered accounts</h2></div><a class="btn btn-primary" href="/api/ml/compare/">View ML comparison</a></div>
+    <div class="patient-cards">
+    {% for p in patients %}
+      <article class="patient-card"><div class="avatar-bubble">{{ p.username|slice:":1"|upper }}</div><div class="patient-main"><b>{{ p.username }}</b><small>{{ p.email|default:"No email" }}</small><div class="patient-tags"><span>{{ p.game_sessions.count }} sessions</span>{% with latest=p.game_sessions.last %}{% if latest %}<span class="score-pill">{{ latest.score_percent }}% latest</span>{% else %}<span>Not started</span>{% endif %}{% endwith %}</div></div><span class="patient-arrow">→</span></article>
+    {% empty %}<div class="empty-card">No demo patients found.</div>{% endfor %}
+    </div>
+  </div>
+  <aside class="panel caregiver-ai"><div class="ai-big">🌱</div><span class="eyebrow">RESPONSIBLE ADAPTATION</span><h2>Decision Tree engine</h2><p>The model uses recent accuracy, response time, hints, current difficulty and correct streak to select a gentle next difficulty.</p><div class="ai-points"><span>✓ Transparent inputs</span><span>✓ Synthetic demo training data</span><span>✓ Not a clinical prediction</span></div></aside>
+</div>
+<div class="caregiver-note"><span>🔐</span><div><b>Privacy-first prototype</b><p>Use fictional information only. A production system would require consent, audited access controls, encryption, data retention rules and security review.</p></div></div>
+{% endblock %}

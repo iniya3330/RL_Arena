@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}CogniCare NER — Memory made playful{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow"><span class="pulse"></span> COGNITIVE PLAY · MEMORY SUPPORT</div>
+    <h1>Little games.<br><span class="gradient-text">Brighter moments.</span></h1>
+    <p class="hero-sub">A warm, playful space for memory, attention, familiar moments and everyday routines — built for older adults and the people who care for them.</p>
+    <div class="hero-buttons">
+      <a class="btn btn-primary btn-large" href="/login/">Start playing <span>→</span></a>
+      <a class="btn btn-outline btn-large" href="#features">See what’s inside</a>
+    </div>
+    <div class="trust-row"><span>✦ Gentle difficulty</span><span>◉ Voice support</span><span>♡ Caregiver view</span></div>
+  </div>
+  <div class="hero-stage">
+    <div class="bubble bubble-one">🧠</div><div class="bubble bubble-two">✦</div><div class="bubble bubble-three">♡</div>
+    <div class="game-orbit orbit-1"></div><div class="game-orbit orbit-2"></div>
+    <div class="brain-card">
+      <div class="brain-glow">🧠</div>
+      <div class="brain-title">Today's mini mission</div>
+      <div class="brain-sub">Remember · Notice · Smile</div>
+      <div class="mini-progress"><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="spark-row"><span>+1 focus</span><span>+1 memory</span></div>
+    </div>
+    <div class="float-card float-left"><span>🌼</span><div><b>Daily moments</b><small>Small steps count</small></div></div>
+    <div class="float-card float-right"><span>🎯</span><div><b>Adaptive play</b><small>Just-right challenges</small></div></div>
+  </div>
+</section>
+
+<section class="feature-section" id="features">
+  <div class="section-heading"><span class="eyebrow">PLAYFUL · SIMPLE · SUPPORTIVE</span><h2>Everything is a little card to explore</h2><p>Big buttons, friendly bubbles and short activities keep the experience easy to follow.</p></div>
+  <div class="feature-grid">
+    <article class="feature-card card-lav"><div class="feature-icon">🧩</div><span class="feature-number">01</span><h3>Adaptive games</h3><p>Memory, attention, recognition and sequencing activities adjust gently from recent responses.</p><div class="card-bubble">Play →</div></article>
+    <article class="feature-card card-peach"><div class="feature-icon">📸</div><span class="feature-number">02</span><h3>Familiar memories</h3><p>Use a local family photo as a conversation prompt without uploading it in this demo.</p><div class="card-bubble">Explore →</div></article>
+    <article class="feature-card card-mint"><div class="feature-icon">⏰</div><span class="feature-number">03</span><h3>Daily reminders</h3><p>Keep simple routine prompts visible for medicine, hydration, appointments and practice.</p><div class="card-bubble">Organize →</div></article>
+    <article class="feature-card card-blue"><div class="feature-icon">📈</div><span class="feature-number">04</span><h3>Caregiver insights</h3><p>See session history and engagement summaries through a clean caregiver dashboard.</p><div class="card-bubble">View →</div></article>
+  </div>
+</section>
+<section class="bottom-cta"><div><span class="eyebrow">ONE SMALL MOMENT</span><h2>Ready for a friendly brain break?</h2><p>Start with a short seven-question session and go at your own pace.</p></div><a class="btn btn-primary" href="/login/">Open CogniCare →</a></section>
+{% endblock %}

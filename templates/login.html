@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Sign in — CogniCare NER{% endblock %}
+{% block content %}
+<section class="login-page">
+  <div class="login-visual">
+    <div class="eyebrow"><span class="pulse"></span> WELCOME BACK</div>
+    <h1>Let’s make<br><span class="gradient-text">memory playful.</span></h1>
+    <p>A calm, game-like space where every answer helps the next activity feel more comfortable.</p>
+    <div class="login-bubbles">
+      <div class="login-bubble lb-one">🧠<small>Think</small></div>
+      <div class="login-bubble lb-two">🎈<small>Play</small></div>
+      <div class="login-bubble lb-three">💜<small>Connect</small></div>
+      <div class="login-bubble lb-four">✨<small>Grow</small></div>
+    </div>
+    <div class="login-feature-row"><span>✓ Short sessions</span><span>✓ Optional voice</span><span>✓ Adaptive difficulty</span></div>
+  </div>
+  <div class="login-card">
+    <div class="login-card-top"><span class="login-symbol">✦</span><span class="eyebrow">SECURE DEMO ACCESS</span></div>
+    <h2>Sign in to play</h2><p class="muted">Use the demo account that matches your role.</p>
+    <form method="post" class="form-stack">{% csrf_token %}
+      <label>Email address</label><input type="email" name="email" placeholder="you@example.com" required>
+      <label>Password</label><input type="password" name="password" placeholder="Enter your password" required>
+      <label>Continue as</label>
+      <select name="role"><option value="patient">Patient / older adult</option><option value="caregiver">Caregiver / administrator</option></select>
+      <button class="btn btn-primary btn-full" type="submit">Enter my space <span>→</span></button>
+    </form>
+    <div class="demo-credentials">
+      <div><b>Demo patient</b><span>patient@cognicare.demo</span></div>
+      <div><b>Demo caregiver</b><span>admin@cognicare.demo</span></div>
+      <small>Password for both: <strong>Care12345!</strong></small>
+    </div>
+    <p class="tiny-note">Demo only. Never enter real patient information. Game scores are engagement indicators, not clinical assessments.</p>
+  </div>
+</section>
+{% endblock %}
