@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Admin panel · RL Arena{% endblock %}
+{% block content %}
+<section class="arena-head">
+  <div class="arena-title reveal">
+    <span class="eyebrow"><i class="live-dot"></i> Admin panel · live</span>
+    <h1>Players &amp; <span class="neon-text">accuracy</span></h1>
+    <p class="muted">Every player with their accuracy band, progress and status. Engagement data only, not a clinical measure.</p>
+  </div>
+  <div class="cta-row reveal">
+    <a class="btn btn-ghost" href="{% url 'admin_export' %}">⬇ Export CSV</a>
+    <button class="btn btn-ghost" id="refreshBtn" type="button">↻ Refresh</button>
+  </div>
+</section>
+
+<section class="stat-row">
+  <div class="stat glass reveal"><small>Players</small><strong data-count="{{ summary.players }}">{{ summary.players }}</strong><em>registered</em></div>
+  <div class="stat glass reveal"><small>Active</small><strong data-count="{{ summary.active }}">{{ summary.active }}</strong><em>can sign in</em></div>
+  <div class="stat glass reveal"><small>Answers</small><strong data-count="{{ summary.answers }}">{{ summary.answers }}</strong><em>across all players</em></div>
+  <div class="stat glass reveal"><small>Average accuracy</small><strong data-count="{{ summary.average_accuracy }}" data-suffix="%">{{ summary.average_accuracy }}%</strong><em>players with answers</em></div>
+</section>
+
+<section class="panel glass reveal">
+  <div class="panel-head"><div><span class="eyebrow">Accuracy spread</span><h2>How players are doing</h2></div></div>
+  <div class="dist" id="dist"></div>
+  <div class="legend"><span><i class="dot high"></i>80%+ high</span><span><i class="dot mid"></i>60–79% mid</span><span><i class="dot low"></i>under 60% needs support</span><span><i class="dot none"></i>no answers yet</span></div>
+</section>
+
+<section class="arena-grid">
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">Player list</span><h2>All players</h2></div><span class="pill" id="shownCount">—</span></div>
+    <div class="toolbar">
+      <input id="playerSearch" type="search" placeholder="Search name or email" aria-label="Search players">
+      <select id="sortBy" aria-label="Sort players">
+        <option value="accuracy">Sort: accuracy</option><option value="xp">Sort: XP</option>
+        <option value="runs">Sort: runs</option><option value="name">Sort: name</option><option value="last">Sort: last active</option>
+      </select>
+    </div>
+    <div class="chips" id="bandFilters">
+      <button class="chip-btn is-on" data-band="all" type="button">All</button>
+      <button class="chip-btn" data-band="high" type="button">High</button>
+      <button class="chip-btn" data-band="mid" type="button">Mid</button>
+      <button class="chip-btn" data-band="low" type="button">Needs support</button>
+      <button class="chip-btn" data-band="none" type="button">No answers</button>
+    </div>
+    <div class="table-wrap">
+      <table class="players-table">
+        <thead><tr><th>Player</th><th>Accuracy</th><th>Runs</th><th>Level</th><th>Cleared</th><th>Status</th><th></th></tr></thead>
+        <tbody id="playersBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">Leaderboard</span><h2>Top players</h2></div></div>
+    <ol class="leaderboard">
+      {% for e in board %}
+      <li class="lb-row" style="animation-delay:{{ forloop.counter0 }}0ms"><span class="rank">{{ e.rank }}</span><span class="lb-name">{{ e.user.first_name|default:e.user.username }}<small>LV {{ e.total_xp }} XP · {{ e.accuracy_percent }}% accuracy</small></span><span class="lb-xp">{{ e.total_xp }} XP</span></li>
+      {% empty %}<li class="muted">No runs finished yet.</li>{% endfor %}
+    </ol>
+  </div>
+</section>
+
+<section class="arena-grid">
+  <aside class="panel glass reveal">
+    <span class="eyebrow">Extended Decision Tree</span>
+    <h2>Preview the engine</h2>
+    <p class="muted">Move the sliders to see the next band, the tree's confidence and which signals matter most.</p>
+    <form id="predictForm" class="predict-form">
+      <label>Recent accuracy <output data-out="accuracy">60%</output><input type="range" name="accuracy" min="0" max="1" step="0.05" value="0.6"></label>
+      <label>Response time (s) <output data-out="seconds">12</output><input type="range" name="seconds" min="2" max="40" step="1" value="12"></label>
+      <label>Hints used <output data-out="hints">0</output><input type="range" name="hints" min="0" max="5" step="1" value="0"></label>
+      <label>Current band <output data-out="difficulty">1</output><input type="range" name="difficulty" min="1" max="3" step="1" value="1"></label>
+      <label>Correct streak <output data-out="streak">0</output><input type="range" name="streak" min="0" max="10" step="1" value="0"></label>
+      <label>Overall skill <output data-out="overall_skill">50%</output><input type="range" name="overall_skill" min="0" max="1" step="0.05" value="0.5"></label>
+    </form>
+    <div class="prediction glass" id="predictionBox">
+      <div class="prediction-level" id="predLevel">—</div>
+      <div class="confidence-track"><span id="predConfidence"></span></div>
+      <p id="predReason" class="muted"></p>
+      <ul class="importance" id="predImportance"></ul>
+    </div>
+  </aside>
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">Guide</span><h2>What the bands mean</h2></div></div>
+    <ul class="guide">
+      <li><b>High (80%+)</b> Strong accuracy. The engine raises the level when this holds.</li>
+      <li><b>Mid (60–79%)</b> Steady progress. The engine keeps the level comfortable.</li>
+      <li><b>Needs support (under 60%)</b> Consider a check-in. Hints and calibration help.</li>
+      <li><b>Disabling</b> blocks sign-in without deleting data. Re-enable at any time.</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+{{ players|json_script:"initialPlayers" }}
+<script>window.RL_CONFIG = {predictUrl: "/api/ml/predict/", playersUrl: "/api/admin/players/", toggleBase: "/admin-panel/user/", userBase: "/admin-panel/user/"};</script>
+<script src="{% static 'js/admin.js' %}"></script>
+{% endblock %}

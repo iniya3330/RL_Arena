@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static i18n_extras %}
+{% block title %}Create account · RL Arena{% endblock %}
+{% block content %}
+<section class="auth-page">
+  <div class="auth-visual reveal">
+    <span class="eyebrow"><i class="live-dot"></i> {% tr "signup_eyebrow" %}</span>
+    <h1>{% tr "signup_title" %}</h1>
+    <p class="lead">{% tr "signup_lead" %}</p>
+    <div class="level-preview" aria-hidden="true"><span>1</span><span>2</span><span class="done">3</span><span class="done">4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+  </div>
+  <div class="login-card glass reveal" data-tilt>
+    <span class="eyebrow">{% tr "sign_up_card_eyebrow" %}</span>
+    <h2>{% tr "sign_up_card_title" %}</h2>
+    <form method="post" class="form-stack" id="signupForm">{% csrf_token %}
+      <label for="name">{% tr "label_name" %}</label>
+      <input id="name" name="name" value="{{ values.name }}" placeholder="Asha Rao" maxlength="150" required>
+      <label for="email">{% tr "label_email" %}</label>
+      <input id="email" type="email" name="email" value="{{ values.email }}" placeholder="you@example.com" maxlength="150" autocomplete="username" required>
+      <label for="password">{% tr "label_password" %} <small>{% tr "password_min_hint" %}</small></label>
+      <input id="password" type="password" name="password" autocomplete="new-password" minlength="8" required>
+      <div class="strength"><span id="strengthBar"></span></div>
+      <label for="confirm">{% tr "label_confirm" %}</label>
+      <input id="confirm" type="password" name="confirm" autocomplete="new-password" minlength="8" required>
+      <button class="btn btn-neon btn-block btn-lg" type="submit">{% tr "create_account_btn" %}</button>
+    </form>
+    <p class="muted switch-line">{% tr "have_account" %} <a class="link" href="/login/">{% tr "sign_in_link" %}</a></p>
+    <div class="hint-box" id="roleHint">{% tr "role_hint" %}</div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/auth.js' %}"></script>{% endblock %}

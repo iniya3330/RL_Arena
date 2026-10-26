@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static i18n_extras %}
+{% block title %}Sign in · RL Arena{% endblock %}
+{% block content %}
+<section class="auth-page">
+  <div class="auth-visual reveal">
+    <span class="eyebrow"><i class="live-dot"></i> {% tr "login_eyebrow" %}</span>
+    <h1>{% tr "login_title" %}</h1>
+    <p class="lead">{% tr "login_lead" %}</p>
+    <div class="chip-row"><span>{% tr "chip_short_runs" %}</span><span>{% tr "chip_adaptive" %}</span><span>{% tr "chip_progress" %}</span></div>
+  </div>
+  <div class="login-card glass reveal" data-tilt>
+    <span class="eyebrow">{% tr "sign_in" %}</span>
+    <h2>{% tr "good_to_see_you" %}</h2>
+    <form method="post" class="form-stack">{% csrf_token %}
+      <label for="email">{% tr "label_email" %}</label>
+      <input id="email" type="email" name="email" placeholder="you@example.com" autocomplete="username" required>
+      <label for="password">{% tr "label_password" %}</label>
+      <input id="password" type="password" name="password" placeholder="{% tr 'placeholder_password' %}" autocomplete="current-password" required>
+      <button class="btn btn-neon btn-block btn-lg" type="submit">{% tr "enter_btn" %}</button>
+    </form>
+    <p class="muted switch-line">{% tr "new_here" %} <a class="link" href="/signup/">{% tr "create_account_link" %}</a></p>
+    <div class="hint-box">{% tr "login_admin_hint" %}</div>
+    <p class="tiny-note">{% tr "login_note" %}</p>
+  </div>
+</section>
+{% endblock %}

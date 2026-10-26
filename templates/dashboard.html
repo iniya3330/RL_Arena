@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load static i18n_extras %}
+{% block title %}My Arena · RL Arena{% endblock %}
+{% block content %}
+<section class="arena-head">
+  <div class="orbit-avatar reveal" aria-label="{% tr 'level_badge' n=level.level %}">
+    <svg viewBox="0 0 120 120" class="orbit-svg">
+      <circle class="orbit-track" cx="60" cy="60" r="52"></circle>
+      <circle class="orbit-progress" id="xpRing" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
+    </svg>
+    <span class="orbit-moon" aria-hidden="true"></span>
+    <div class="orbit-initial">{{ user.first_name|default:user.username|slice:":1"|upper }}</div>
+    <span class="level-badge" id="levelBadge">{% tr "level_badge" n=level.level %}</span>
+  </div>
+  <div class="arena-title reveal">
+    <span class="eyebrow"><i class="live-dot"></i> {% tr "command_deck" %}</span>
+    <h1>{% tr "welcome_back" %}, <span class="neon-text">{{ user.first_name|default:user.username }}</span></h1>
+    <p class="muted"><span id="xpText">{% tr "xp_to_next" xp=level.into_level needed=level.needed next=level.level|add:"1" %}</span> · <span id="badgeCount">— / 23</span> {% tr "badges_word" %}</p>
+  </div>
+</section>
+
+<section class="stat-row">
+  <div class="stat glass reveal"><small>{% tr "stat_runs" %}</small><strong id="totalSessions" class="count">{{ sessions|length }}</strong><em>{% tr "stat_runs_sub" %}</em></div>
+  <div class="stat glass reveal"><small>{% tr "stat_average" %}</small><strong id="averageScore" class="count">—</strong><em>{% tr "stat_engagement" %}</em></div>
+  <div class="stat glass reveal"><small>{% tr "stat_best_streak" %}</small><strong id="bestStreak" class="count">0</strong><em>{% tr "stat_in_a_row" %}</em></div>
+  <div class="stat glass reveal"><small>{% tr "stat_reminders" %}</small><strong class="count">{{ reminders|length }}</strong><em>{% tr "stat_at_time" %}</em></div>
+</section>
+
+<section class="arena-grid">
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">{% tr "run_eyebrow" %}</span><h2>{% tr "run_title" %}</h2></div><span class="pill">{% tr "ai_adaptive" %}</span></div>
+    <p class="muted">{% tr "run_intro" %}</p>
+    <div class="run-actions">
+      <button class="btn btn-neon btn-lg btn-pulse" id="startRun" type="button">{% tr "btn_start" %}</button>
+      <button class="btn btn-ghost btn-lg" id="hearInstructions" type="button" aria-label="{% tr 'btn_hear' %}">{% tr "btn_hear" %}</button>
+    </div>
+    <ol class="how-steps">
+      <li><b>1</b> {% tr "step_1" %}</li>
+      <li><b>2</b> {% tr "step_2" %}</li>
+      <li><b>3</b> {% tr "step_3" %}</li>
+    </ol>
+  </div>
+
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">{% tr "batch_eyebrow" %}</span><h2>{% tr "batch_title" %}</h2></div><span class="pill" id="batchPill">—</span></div>
+    <div class="overall">
+      <div class="skill-head"><b>{% tr "your_skill" %}</b><span id="skillScore">0</span></div>
+      <div class="skill-track big"><span id="skillFill"></span></div>
+    </div>
+    <p class="muted" id="nextUnlock">{% tr "loading_unlock" %}</p>
+    <div class="batch-grid" id="batchGrid"><p class="muted">{% tr "loading_levels" %}</p></div>
+    <div class="batch-next" id="batchNext"></div>
+    <div class="legend"><span><i class="dot cleared"></i>{% tr "legend_cleared" %}</span><span><i class="dot open"></i>{% tr "legend_open" %}</span><span><i class="dot locked"></i>{% tr "legend_locked" %}</span></div>
+  </div>
+</section>
+
+<section class="panel glass reveal">
+  <div class="panel-head"><div><span class="eyebrow">{% tr "badges_eyebrow" %}</span><h2>{% tr "badge_wall" %}</h2></div><span class="pill" id="badgePill">—</span></div>
+  <div class="badge-grid" id="badgeGrid"><p class="muted">{% tr "badges_loading" %}</p></div>
+</section>
+
+<section class="arena-grid">
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">{% tr "live_standings" %}</span><h2>{% tr "leaderboard" %}</h2></div><span class="pill" id="myRankPill">—</span></div>
+    <ol class="leaderboard" id="leaderboard"><li class="muted">{% tr "loading_standings" %}</li></ol>
+  </div>
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">{% tr "reminders_eyebrow" %}</span><h2>{% tr "reminders_title" %}</h2></div></div>
+    <p class="muted sms-note">{% tr "reminders_note" %}</p>
+    <div class="reminder-list">
+      {% for r in reminders %}
+      <div class="reminder-item"><span class="time-pill">{% if r.reminder_time %}{{ r.reminder_time|time:"H:i" }}{% else %}{% tr "any_time" %}{% endif %}</span><div><b>{{ r.title }}</b><small>{{ r.reminder_type }}{% if r.notes %} · {{ r.notes }}{% endif %}</small></div></div>
+      {% empty %}<p class="muted">{% tr "no_reminders" %}</p>{% endfor %}
+    </div>
+    <form id="reminderForm" class="reminder-form">
+      <input id="reminderTitle" placeholder="{% tr 'reminder_placeholder' %}" maxlength="150" required aria-label="{% tr 'reminder_text_label' %}">
+      <select id="reminderType" aria-label="{% tr 'reminder_type_label' %}">
+        <option value="Daily routine">{% tr "type_daily" %}</option>
+        <option value="Medicine">{% tr "type_medicine" %}</option>
+        <option value="Cognitive activity">{% tr "type_cognitive" %}</option>
+        <option value="Appointment">{% tr "type_appointment" %}</option>
+      </select>
+      <input id="reminderTime" type="time" required aria-label="{% tr 'reminder_time_label' %}">
+      <button class="btn btn-neon" type="submit">{% tr "add_reminder" %}</button>
+    </form>
+  </div>
+</section>
+
+<section class="panel glass reveal">
+  <div class="panel-head"><div><span class="eyebrow">{% tr "progress_eyebrow" %}</span><h2>{% tr "score_history" %}</h2></div><a class="btn btn-ghost" href="/api/report.pdf">{% tr "export_report" %}</a></div>
+  <div class="chart-box"><canvas id="progressChart" aria-label="{% tr 'score_history' %}"></canvas></div>
+  <div class="table-wrap"><table><thead><tr><th>{% tr "col_date" %}</th><th>{% tr "col_score" %}</th><th>{% tr "col_questions" %}</th><th>{% tr "col_hints" %}</th></tr></thead><tbody>
+  {% for s in sessions %}<tr><td>{{ s.started_at|date:"d M Y, H:i" }}</td><td><span class="score-pill">{{ s.score_percent }}%</span></td><td>{{ s.total_questions }}</td><td>{{ s.hints_used }}</td></tr>{% empty %}<tr><td colspan="4" class="empty-cell">{% tr "history_empty" %}</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<!-- Full-screen run. Covers the whole screen while a run is on. -->
+<div class="game-layer hidden" id="gameLayer" role="dialog" aria-modal="true" aria-label="{% tr 'run_title' %}">
+  <div class="countdown hidden" id="countdown" aria-live="assertive"></div>
+  <div class="combo hidden" id="combo">🔥 x0</div>
+  <div class="game-inner">
+    <div class="game-top">
+      <span class="pill" id="roundInfo">—</span>
+      <span class="chip level-chip" id="levelLabel">—</span>
+      <span class="chip" id="streakChip">{% tr "streak_label" n=0 %}</span>
+      <span class="chip" id="xpChip">{% tr "xp_label" n=0 %}</span>
+      <span class="timer" aria-hidden="true"><svg viewBox="0 0 40 40"><circle class="timer-track" cx="20" cy="20" r="16"></circle><circle class="timer-ring" id="timerRing" cx="20" cy="20" r="16"></circle></svg><b id="timerText">0.0s</b></span>
+      <button class="btn btn-ghost btn-sm leave-btn" id="quitGame" type="button">{% tr "leave_btn" %}</button>
+    </div>
+    <div class="progress-track"><span id="questionProgress"></span></div>
+    <div class="game-card">
+      <h3 id="questionText">—</h3>
+      <div id="hintText" class="hint hidden"></div>
+      <div id="answerOptions" class="answer-grid"></div>
+      <div class="game-actions">
+        <button class="btn btn-ghost" id="hintButton" type="button">{% tr "hint_btn" %}</button>
+        <button class="btn btn-ghost" id="readQuestion" type="button">{% tr "read_aloud_btn" %}</button>
+        <button class="btn btn-neon" id="finishGame" type="button">{% tr "finish_btn" %}</button>
+      </div>
+      <p id="gameFeedback" class="feedback" aria-live="polite"></p>
+      <div class="engine-note"><span>✦</span><div><b>{% tr "engine_title" %}</b><small id="adaptationText">{% tr "engine_calibrating" %}</small><small id="confidenceText"></small></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Reminder messages that appear at their time while this page is open. -->
+<div class="sms-stack" id="smsStack" aria-live="polite"></div>
+
+<!-- Full-screen badge unlock. -->
+<div class="overlay hidden" id="overlay" role="dialog" aria-modal="true"><div class="overlay-card glass" id="overlayCard"></div></div>
+{% endblock %}
+{% block scripts %}
+{{ reminder_data|json_script:"reminderData" }}
+
+<script>
+window.RL_CONFIG = {
+  analyticsUrl: "/api/analytics/", startUrl: "/api/sessions/start/", answerUrl: "/api/sessions/answer/",
+  finishUrl: "/api/sessions/finish/", remindersUrl: "/api/reminders/", levelsUrl: "/api/arena/levels/",
+  progressUrl: "/api/player/progress/", leaderboardUrl: "/api/leaderboard/"
+};
+</script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

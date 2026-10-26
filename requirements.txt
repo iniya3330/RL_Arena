@@ -1,0 +1,7 @@
+Django>=5.2,<6.1
+djangorestframework>=3.16,<4.0
+pandas>=2.2
+scikit-learn>=1.5
+mysqlclient>=2.2; platform_system != "Windows"
+PyMySQL>=1.1; platform_system == "Windows"
+reportlab>=4.2

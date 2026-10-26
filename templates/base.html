@@ -1,0 +1,48 @@
+{% load static i18n_extras %}
+{% current_lang as lang %}{% lang_options as options %}
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}RL Arena{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+</head>
+<body>
+<div hidden>{% csrf_token %}</div>
+<div class="splash" id="splash" aria-hidden="true"><div class="splash-orb"></div><b>RL Arena</b><small>Engagement games</small></div>
+<canvas id="particles" aria-hidden="true"></canvas>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="app-shell">
+<header class="topbar glass">
+  <a class="brand" href="/"><span class="brand-mark">✦</span><span>RL Arena <small>engagement games</small></span></a>
+  <nav class="top-nav">
+    {% if user.is_authenticated %}
+      {% if user.is_staff %}<a class="nav-link" href="/admin-panel/">{% tr "nav_admin" %}</a>{% else %}<a class="nav-link" href="/dashboard/">{% tr "nav_arena" %}</a>{% endif %}
+      <span class="user-chip">{{ user.first_name|default:user.username }}</span>
+      <a class="btn btn-ghost btn-sm" href="/logout/">{% tr "nav_logout" %}</a>
+    {% else %}
+      <a class="nav-link" href="/login/">{% tr "nav_signin" %}</a>
+      <a class="btn btn-neon btn-sm" href="/signup/">{% tr "nav_signup" %}</a>
+    {% endif %}
+    <nav class="lang-switch" aria-label="{% tr 'language_label' %}">
+      {% for o in options %}<a href="/language/{{ o.code }}/" class="{% if o.active %}active{% endif %}" hreflang="{{ o.code }}" lang="{{ o.code }}" title="{{ o.name }}">{{ o.name }}</a>{% endfor %}
+    </nav>
+    <button class="icon-btn" id="soundToggle" type="button" aria-label="{% tr 'sound_label' %}" title="{% tr 'sound_label' %}">🔊</button>
+  </nav>
+</header>
+{% if messages %}<div class="messages">{% for message in messages %}<div class="message {% if message.tags == 'error' %}message-error{% else %}message-ok{% endif %}">{{ message }}</div>{% endfor %}</div>{% endif %}
+<main>{% block content %}{% endblock %}</main>
+<footer><span>✦ RL Arena</span><span>{% tr "footer_tagline" %}</span></footer>
+</div>
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+{{ i18n|json_script:"i18nData" }}
+<script>window.RL_I18N = JSON.parse(document.getElementById("i18nData").textContent);</script>
+<script src="{% static 'js/script.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
