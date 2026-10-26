@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Sign in · RL Arena{% endblock %}
+{% block content %}
+<section class="auth-page">
+  <div class="auth-visual reveal">
+    <span class="eyebrow"><i class="live-dot"></i> Welcome back</span>
+    <h1>Step back into the <span class="neon-text">RL Arena</span></h1>
+    <p class="lead">Players go to the arena. Caregivers go to the admin panel. Both sign in with their own email and password.</p>
+    <div class="chip-row"><span>✓ Short runs</span><span>✓ Adaptive levels</span><span>✓ Real-time progress</span></div>
+  </div>
+  <div class="login-card glass reveal" data-tilt>
+    <span class="eyebrow">Sign in</span>
+    <h2>Good to see you</h2>
+    <form method="post" class="form-stack">{% csrf_token %}
+      <label for="email">Email</label>
+      <input id="email" type="email" name="email" placeholder="you@example.com" autocomplete="username" required>
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" placeholder="Your password" autocomplete="current-password" required>
+      <button class="btn btn-neon btn-block btn-lg" type="submit">Enter →</button>
+    </form>
+    <p class="muted switch-line">New here? <a class="link" href="/signup/">Create an account</a></p>
+    <div class="hint-box"><b>Admins:</b> the email must contain the word <code>admin</code>, for example <code>nurse.admin@clinic.org</code>.</div>
+    <p class="tiny-note">Use real names only in production. Scores are engagement indicators, not clinical assessments.</p>
+  </div>
+</section>
+{% endblock %}

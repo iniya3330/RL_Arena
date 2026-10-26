@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ p.name }} · Admin panel{% endblock %}
+{% block content %}
+<section class="arena-head">
+  <div class="orbit-avatar reveal" style="--ring:{% if p.accuracy is None %}#5d6692{% elif p.band == 'high' %}#5ef2b0{% elif p.band == 'mid' %}#ffe05e{% else %}#ff5ec8{% endif %}">
+    <svg viewBox="0 0 120 120" class="orbit-svg"><circle class="orbit-track" cx="60" cy="60" r="52"></circle><circle class="orbit-progress" cx="60" cy="60" r="52" stroke="var(--ring)" stroke-dasharray="326.7" stroke-dashoffset="326.7" data-accuracy="{{ p.accuracy|default:0 }}"></circle></svg>
+    <div class="orbit-initial">{{ p.name|slice:":1"|upper }}</div>
+    <span class="level-badge">{% if p.accuracy is None %}—{% else %}{{ p.accuracy }}%{% endif %}</span>
+  </div>
+  <div class="arena-title reveal">
+    <span class="eyebrow">Player detail</span>
+    <h1>{{ p.name }}</h1>
+    <p class="muted">{{ p.email }} · joined {{ p.joined }} · last active {{ p.last_active }}</p>
+    <div class="chips"><span class="acc acc-{{ p.band }}">{% if p.accuracy is None %}No answers yet{% else %}{{ p.accuracy }}% accuracy{% endif %}</span><span class="chip">Level {{ p.level }}</span><span class="chip">{{ p.xp }} XP</span><span class="chip">{{ p.cleared }} levels cleared</span><span class="chip">{{ levels_reached }} levels reached</span><span class="chip">{% if p.active %}Active{% else %}Disabled{% endif %}</span></div>
+  </div>
+  <form method="post" action="{% url 'admin_toggle' p.id %}" class="reveal">{% csrf_token %}<input type="hidden" name="next" value="{% url 'admin_user' p.id %}"><button class="btn {% if p.active %}btn-danger{% else %}btn-neon{% endif %}" type="submit">{% if p.active %}Disable account{% else %}Re-enable account{% endif %}</button></form>
+</section>
+
+<section class="arena-grid">
+  <div class="panel glass reveal trend-card trend-{{ trend.status }}">
+    <div class="panel-head"><div><span class="eyebrow">Change over time</span><h2>Compared with the start</h2></div><span class="pill">{{ trend.label }}</span></div>
+    {% if trend.before is None %}
+      <p class="muted">{{ trend.label }} before the comparison can start. The comparison uses the first three runs as the baseline and the latest three runs as now.</p>
+    {% else %}
+      <div class="trend-stats">
+        <div><small>Baseline (first 3 runs)</small><strong>{{ trend.before }}%</strong></div>
+        <div><small>Now (latest 3 runs)</small><strong>{{ trend.now }}%</strong></div>
+        <div><small>Change</small><strong>{% if trend.change > 0 %}+{% endif %}{{ trend.change }} pts</strong></div>
+      </div>
+    {% endif %}
+    <p class="disclaimer">This compares game performance over time. It is not a dementia assessment or diagnosis. Read it alongside a clinician's judgement.</p>
+    <div class="chart-box"><canvas id="runChart" aria-label="Run scores over time"></canvas></div>
+  </div>
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">Domains</span><h2>Accuracy and skill</h2></div></div>
+    <div class="skill-list">
+      {% for d in domains %}
+      <div class="skill-row"><div class="skill-head"><b>{{ d.label }}</b><span>{{ d.accuracy }}% acc · skill {{ d.skill }}</span></div><div class="skill-track"><span style="width:{{ d.accuracy }}%"></span></div></div>
+      {% endfor %}
+    </div>
+    <div class="chart-box radar-box"><canvas id="detailRadar"></canvas></div>
+  </div>
+</section>
+
+<section class="panel glass reveal">
+  <div class="panel-head"><div><span class="eyebrow">Levels</span><h2>Which levels they reached</h2></div><span class="pill">{{ levels_reached }} levels · highest {{ highest_level|default:"—" }}</span></div>
+  <div class="table-wrap"><table><thead><tr><th>Level</th><th>Batch</th><th>Attempts</th><th>Correct</th><th>Score</th><th>Last result</th><th>Last seen</th></tr></thead><tbody>
+  {% for lv in levels %}<tr><td><b>Level {{ lv.level }}</b></td><td>{{ lv.batch }}</td><td>{{ lv.attempts }}</td><td>{{ lv.correct }}</td><td><span class="acc acc-{% if lv.score >= 80 %}high{% elif lv.score >= 60 %}mid{% else %}low{% endif %}">{{ lv.score }}%</span></td><td>{{ lv.last_result }}</td><td>{{ lv.last }}</td></tr>{% empty %}<tr><td colspan="7" class="empty-cell">No levels played yet.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<section class="arena-grid">
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">History</span><h2>Recent runs</h2></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Score</th><th>Questions</th><th>Hints</th><th>Best streak</th><th>XP</th></tr></thead><tbody>
+    {% for s in sessions %}<tr><td>{{ s.started_at|date:"d M Y, H:i" }}</td><td><span class="acc acc-{% if s.score_percent >= 80 %}high{% elif s.score_percent >= 60 %}mid{% else %}low{% endif %}">{{ s.score_percent }}%</span></td><td>{{ s.total_questions }}</td><td>{{ s.hints_used }}</td><td>{{ s.best_streak }}</td><td>{{ s.xp_earned }}</td></tr>{% empty %}<tr><td colspan="6" class="empty-cell">No runs yet.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </div>
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">Reminders</span><h2>Active reminders</h2></div></div>
+    <div class="reminder-list">{% for r in reminders %}<div class="reminder-item"><span class="time-pill">{% if r.reminder_time %}{{ r.reminder_time|time:"H:i" }}{% else %}—{% endif %}</span><div><b>{{ r.title }}</b><small>{{ r.reminder_type }} · shown at its time</small></div></div>{% empty %}<p class="muted">No reminders set.</p>{% endfor %}</div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+{{ domains|json_script:"domainData" }}
+{{ run_chart|json_script:"runData" }}
+<script>
+(() => {
+  const data = JSON.parse(document.getElementById("domainData").textContent);
+  const runs = JSON.parse(document.getElementById("runData").textContent);
+  const ring = document.querySelector(".orbit-progress");
+  if (ring) {
+    const pct = Number(ring.dataset.accuracy || 0);
+    const C = 326.7;
+    requestAnimationFrame(() => { ring.style.strokeDashoffset = String(C * (1 - pct / 100)); });
+  }
+  if (window.Chart && document.getElementById("runChart") && runs.scores.length) {
+    const baseline = runs.scores.slice(0, 3).reduce((a, b) => a + b, 0) / Math.min(3, runs.scores.length);
+    new Chart(document.getElementById("runChart"), {
+      type: "line",
+      data: {labels: runs.labels, datasets: [
+        {label: "Run score (%)", data: runs.scores, borderColor: "#5ec8ff", backgroundColor: "rgba(94,200,255,.12)", fill: true, tension: .35, pointBackgroundColor: "#ff5ec8"},
+        {label: "Baseline (first 3 runs)", data: runs.scores.map(() => Number(baseline.toFixed(1))), borderColor: "#ffe05e", borderDash: [6, 6], pointRadius: 0, fill: false}]},
+      options: {responsive: true, maintainAspectRatio: false, scales: {y: {min: 0, max: 100, ticks: {color: "#9aa6d6"}, grid: {color: "rgba(255,255,255,.06)"}}, x: {ticks: {color: "#9aa6d6"}, grid: {display: false}}}, plugins: {legend: {labels: {color: "#c9d2f5"}}}}
+    });
+  }
+  if (window.Chart && document.getElementById("detailRadar")) {
+    new Chart(document.getElementById("detailRadar"), {
+      type: "radar",
+      data: {labels: data.map((d) => d.label), datasets: [
+        {label: "Accuracy", data: data.map((d) => d.accuracy), borderColor: "#5ec8ff", backgroundColor: "rgba(94,200,255,.18)", pointBackgroundColor: "#5ec8ff"},
+        {label: "Skill", data: data.map((d) => d.skill), borderColor: "#ff5ec8", backgroundColor: "rgba(255,94,200,.10)", pointBackgroundColor: "#ff5ec8"}]},
+      options: {responsive: true, maintainAspectRatio: false, scales: {r: {min: 0, max: 100, ticks: {display: false}, grid: {color: "rgba(255,255,255,.08)"}, angleLines: {color: "rgba(255,255,255,.08)"}, pointLabels: {color: "#c9d2f5"}}}, plugins: {legend: {labels: {color: "#c9d2f5"}}}}
+    });
+  }
+})();
+</script>
+{% endblock %}

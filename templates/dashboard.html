@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}My Arena · RL Arena{% endblock %}
+{% block content %}
+<section class="arena-head">
+  <div class="orbit-avatar reveal" aria-label="Level {{ level.level }}">
+    <svg viewBox="0 0 120 120" class="orbit-svg">
+      <circle class="orbit-track" cx="60" cy="60" r="52"></circle>
+      <circle class="orbit-progress" id="xpRing" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
+    </svg>
+    <span class="orbit-moon" aria-hidden="true"></span>
+    <div class="orbit-initial">{{ user.first_name|default:user.username|slice:":1"|upper }}</div>
+    <span class="level-badge" id="levelBadge">LV {{ level.level }}</span>
+  </div>
+  <div class="arena-title reveal">
+    <span class="eyebrow"><i class="live-dot"></i> Your command deck</span>
+    <h1>Welcome back, <span class="neon-text">{{ user.first_name|default:user.username }}</span></h1>
+    <p class="muted"><span id="xpText">{{ level.into_level }} / {{ level.needed }} XP</span> to level {{ level.level|add:"1" }} · <span id="badgeCount">— / 23</span> badges</p>
+  </div>
+</section>
+
+<section class="stat-row">
+  <div class="stat glass reveal"><small>Runs</small><strong id="totalSessions" class="count">{{ sessions|length }}</strong><em>completed</em></div>
+  <div class="stat glass reveal"><small>Average score</small><strong id="averageScore" class="count">—</strong><em>engagement only</em></div>
+  <div class="stat glass reveal"><small>Best streak</small><strong id="bestStreak" class="count">0</strong><em>correct in a row</em></div>
+  <div class="stat glass reveal"><small>Reminders</small><strong class="count">{{ reminders|length }}</strong><em>shown at their time</em></div>
+</section>
+
+<section class="arena-grid">
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">Arena run</span><h2>Play a run</h2></div><span class="pill">AI adaptive</span></div>
+    <p class="muted">Five warm-up rounds, then the decision tree picks each next level from the levels you have unlocked. You never see the same level twice.</p>
+    <div class="run-actions">
+      <button class="btn btn-neon btn-lg btn-pulse" id="startRun" type="button">▶ Start run</button>
+      <button class="btn btn-ghost btn-lg" id="hearInstructions" type="button" aria-label="Read the instructions aloud">🔊 Hear instructions</button>
+    </div>
+    <ol class="how-steps">
+      <li><b>1</b> Read the question. Tap the answer you think is right.</li>
+      <li><b>2</b> Stuck? Tap Hint, or Read aloud to hear it.</li>
+      <li><b>3</b> When you are done, press Finish &amp; save.</li>
+    </ol>
+  </div>
+
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">Your levels</span><h2>Current batch</h2></div><span class="pill" id="batchPill">Batch —</span></div>
+    <div class="overall">
+      <div class="skill-head"><b>Your skill</b><span id="skillScore">0</span></div>
+      <div class="skill-track big"><span id="skillFill"></span></div>
+    </div>
+    <p class="muted" id="nextUnlock">Loading your next unlock…</p>
+    <div class="batch-grid" id="batchGrid"><p class="muted">Loading levels…</p></div>
+    <div class="batch-next" id="batchNext"></div>
+    <div class="legend"><span><i class="dot cleared"></i>Cleared</span><span><i class="dot open"></i>Unlocked</span><span><i class="dot locked"></i>Locked</span></div>
+  </div>
+</section>
+
+<section class="panel glass reveal">
+  <div class="panel-head"><div><span class="eyebrow">Achievements</span><h2>Badge wall</h2></div><span class="pill" id="badgePill">Loading</span></div>
+  <div class="badge-grid" id="badgeGrid"><p class="muted">Loading badges…</p></div>
+</section>
+
+<section class="arena-grid">
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">Live standings</span><h2>Leaderboard</h2></div><span class="pill" id="myRankPill">—</span></div>
+    <ol class="leaderboard" id="leaderboard"><li class="muted">Loading standings…</li></ol>
+  </div>
+  <div class="panel glass reveal">
+    <div class="panel-head"><div><span class="eyebrow">Daily reminders</span><h2>Reminders</h2></div></div>
+    <p class="muted sms-note">A message pops up at each reminder's time while this page is open.</p>
+    <div class="reminder-list">
+      {% for r in reminders %}
+      <div class="reminder-item"><span class="time-pill">{% if r.reminder_time %}{{ r.reminder_time|time:"H:i" }}{% else %}Any time{% endif %}</span><div><b>{{ r.title }}</b><small>{{ r.reminder_type }}{% if r.notes %} · {{ r.notes }}{% endif %}</small></div></div>
+      {% empty %}<p class="muted">No reminders yet. Add one with a time below.</p>{% endfor %}
+    </div>
+    <form id="reminderForm" class="reminder-form">
+      <input id="reminderTitle" placeholder="e.g. Take morning medicine" maxlength="150" required aria-label="Reminder text">
+      <select id="reminderType" aria-label="Reminder type"><option>Daily routine</option><option>Medicine</option><option>Cognitive activity</option><option>Appointment</option></select>
+      <input id="reminderTime" type="time" required aria-label="Reminder time">
+      <button class="btn btn-neon" type="submit">＋ Add reminder</button>
+    </form>
+  </div>
+</section>
+
+<section class="panel glass reveal">
+  <div class="panel-head"><div><span class="eyebrow">Your journey</span><h2>Score history</h2></div><a class="btn btn-ghost" href="/api/report.pdf">Export report ↓</a></div>
+  <div class="chart-box"><canvas id="progressChart" aria-label="Score over time"></canvas></div>
+  <div class="table-wrap"><table><thead><tr><th>Date</th><th>Score</th><th>Questions</th><th>Hints</th></tr></thead><tbody>
+  {% for s in sessions %}<tr><td>{{ s.started_at|date:"d M Y, H:i" }}</td><td><span class="score-pill">{{ s.score_percent }}%</span></td><td>{{ s.total_questions }}</td><td>{{ s.hints_used }}</td></tr>{% empty %}<tr><td colspan="4" class="empty-cell">Finish your first run and it will appear here.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<!-- Full-screen run. Covers the whole screen while a run is on. -->
+<div class="game-layer hidden" id="gameLayer" role="dialog" aria-modal="true" aria-label="Arena run">
+  <div class="countdown hidden" id="countdown" aria-live="assertive"></div>
+  <div class="combo hidden" id="combo">🔥 x0</div>
+  <div class="game-inner">
+    <div class="game-top">
+      <span class="pill" id="roundInfo">Round 1 of 10</span>
+      <span class="chip level-chip" id="levelLabel">Level —</span>
+      <span class="chip" id="streakChip">🔥 0 streak</span>
+      <span class="chip" id="xpChip">+0 XP</span>
+      <span class="timer" aria-hidden="true"><svg viewBox="0 0 40 40"><circle class="timer-track" cx="20" cy="20" r="16"></circle><circle class="timer-ring" id="timerRing" cx="20" cy="20" r="16"></circle></svg><b id="timerText">0.0s</b></span>
+      <button class="btn btn-ghost btn-sm leave-btn" id="quitGame" type="button">✕ Leave</button>
+    </div>
+    <div class="progress-track"><span id="questionProgress"></span></div>
+    <div class="game-card">
+      <h3 id="questionText">Loading…</h3>
+      <div id="hintText" class="hint hidden"></div>
+      <div id="answerOptions" class="answer-grid"></div>
+      <div class="game-actions">
+        <button class="btn btn-ghost" id="hintButton" type="button">💡 Hint</button>
+        <button class="btn btn-ghost" id="readQuestion" type="button">🔊 Read aloud</button>
+        <button class="btn btn-neon" id="finishGame" type="button">Finish &amp; save</button>
+      </div>
+      <p id="gameFeedback" class="feedback" aria-live="polite"></p>
+      <div class="engine-note"><span>✦</span><div><b>Adaptive engine</b><small id="adaptationText">Calibration is learning how you play.</small><small id="confidenceText"></small></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Reminder messages that appear at their time while this page is open. -->
+<div class="sms-stack" id="smsStack" aria-live="polite"></div>
+
+<!-- Full-screen badge unlock. Also used for other full-screen moments. -->
+<div class="overlay hidden" id="overlay" role="dialog" aria-modal="true"><div class="overlay-card glass" id="overlayCard"></div></div>
+{% endblock %}
+{% block scripts %}
+{{ reminder_data|json_script:"reminderData" }}
+<script>
+window.COGNI_CONFIG = {
+  analyticsUrl: "/api/analytics/", startUrl: "/api/sessions/start/", answerUrl: "/api/sessions/answer/",
+  finishUrl: "/api/sessions/finish/", remindersUrl: "/api/reminders/", levelsUrl: "/api/arena/levels/",
+  progressUrl: "/api/player/progress/", leaderboardUrl: "/api/leaderboard/"
+};
+</script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

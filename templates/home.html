@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}RL Arena · CogniCare{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <span class="eyebrow"><i class="live-dot"></i> Engagement games · Adaptive AI</span>
+    <h1 class="reveal">Enter the <span class="neon-text">RL Arena</span></h1>
+    <p class="lead">200 short levels. The engine picks each next level for you, from the ones you have unlocked and have not played yet. New levels open as your skill grows.</p>
+    <div class="cta-row">
+      <a class="btn btn-neon btn-lg" href="/signup/">Start playing →</a>
+      <a class="btn btn-ghost btn-lg" href="#how">How it works</a>
+    </div>
+    <div class="chip-row"><span>XP &amp; levels</span><span>23 badges</span><span>Live leaderboard</span><span>Radar report</span></div>
+  </div>
+  <div class="hero-orbit glass" data-tilt>
+    <div class="orbit-ring"><span class="orbit-dot"></span><div class="orbit-core">✦</div></div>
+    <p class="orbit-caption">Adaptive difficulty · Decision Tree with confidence</p>
+  </div>
+</section>
+
+<section id="how" class="section">
+  <div class="section-head"><span class="eyebrow">How a run works</span><h2>Five calibration rounds, then the engine takes over</h2><p>200 levels. Every player gets a different path through them.</p></div>
+  <div class="mode-grid">
+    <article class="mode-card glass" data-tilt style="--accent:#8b5cf6"><span class="mode-icon">▶</span><h3>1 · Start a run</h3><p>Hit start and play a short run of ten rounds.</p><small>Ten rounds</small></article>
+    <article class="mode-card glass" data-tilt style="--accent:#5ec8ff"><span class="mode-icon">🧭</span><h3>2 · Calibrate</h3><p>Five warm-up rounds set your starting skill and learn how you play.</p><small>Rounds 1–5</small></article>
+    <article class="mode-card glass" data-tilt style="--accent:#ff5ec8"><span class="mode-icon">🧠</span><h3>3 · Adaptive pick</h3><p>The decision tree chooses each next level, aiming for a fair challenge, and never repeats one you have played.</p><small>Rounds 6–10</small></article>
+    <article class="mode-card glass" data-tilt style="--accent:#5ef2b0"><span class="mode-icon">🔓</span><h3>4 · Unlock more</h3><p>Higher levels open as your skill grows. Clear them to climb.</p><small>200 levels</small></article>
+  </div>
+</section>
+
+<section class="cta-banner glass">
+  <div><span class="eyebrow">One small round</span><h2>Ready for a brain break?</h2><p>Seven questions, your own pace, and a score that is for encouragement, not diagnosis.</p></div>
+  <a class="btn btn-neon btn-lg" href="/signup/">Open RL Arena →</a>
+</section>
+{% endblock %}

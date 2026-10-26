@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Create account · RL Arena{% endblock %}
+{% block content %}
+<section class="auth-page">
+  <div class="auth-visual reveal">
+    <span class="eyebrow"><i class="live-dot"></i> Join the arena</span>
+    <h1>Create your <span class="neon-text">account</span></h1>
+    <p class="lead">Sign up as a player to start runs and unlock levels. Caregivers sign up with an email that contains the word <code>admin</code> to reach the admin panel.</p>
+    <div class="level-preview" aria-hidden="true"><span>1</span><span>2</span><span class="done">3</span><span class="done">4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+  </div>
+  <div class="login-card glass reveal" data-tilt>
+    <span class="eyebrow">Sign up</span>
+    <h2>Create an account</h2>
+    <form method="post" class="form-stack" id="signupForm">{% csrf_token %}
+      <label for="name">Full name</label>
+      <input id="name" name="name" value="{{ values.name }}" placeholder="Asha Rao" maxlength="150" required>
+      <label for="email">Email</label>
+      <input id="email" type="email" name="email" value="{{ values.email }}" placeholder="you@example.com" maxlength="150" autocomplete="username" required>
+      <label for="password">Password <small>(8+ characters)</small></label>
+      <input id="password" type="password" name="password" autocomplete="new-password" minlength="8" required>
+      <div class="strength"><span id="strengthBar"></span></div>
+      <label for="confirm">Confirm password</label>
+      <input id="confirm" type="password" name="confirm" autocomplete="new-password" minlength="8" required>
+      <button class="btn btn-neon btn-block btn-lg" type="submit">Create account →</button>
+    </form>
+    <p class="muted switch-line">Already have an account? <a class="link" href="/login/">Sign in</a></p>
+    <div class="hint-box" id="roleHint"><b>Role:</b> players use any email. Admin accounts need the word <code>admin</code> in the email.</div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/auth.js' %}"></script>{% endblock %}

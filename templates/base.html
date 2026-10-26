@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}RL Arena · CogniCare{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+</head>
+<body>
+<div class="splash" id="splash" aria-hidden="true"><div class="splash-orb"></div><b>RL Arena</b><small>CogniCare</small></div>
+<canvas id="particles" aria-hidden="true"></canvas>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="app-shell">
+<header class="topbar glass">
+  <a class="brand" href="/"><span class="brand-mark">✦</span><span>RL Arena <small>by CogniCare</small></span></a>
+  <nav class="top-nav">
+    {% if user.is_authenticated %}
+      {% if user.is_staff %}<a class="nav-link" href="/admin-panel/">Admin panel</a>{% else %}<a class="nav-link" href="/dashboard/">Arena</a>{% endif %}
+      <span class="user-chip">{{ user.first_name|default:user.username }}</span>
+      <a class="btn btn-ghost btn-sm" href="/logout/">Log out</a>
+    {% else %}
+      <a class="nav-link" href="/login/">Sign in</a>
+      <a class="btn btn-neon btn-sm" href="/signup/">Sign up</a>
+    {% endif %}
+    <button class="icon-btn" id="soundToggle" type="button" aria-label="Toggle sound effects" title="Sound effects">🔊</button>
+  </nav>
+</header>
+{% if messages %}<div class="messages">{% for message in messages %}<div class="message {% if message.tags == 'error' %}message-error{% else %}message-ok{% endif %}">{{ message }}</div>{% endfor %}</div>{% endif %}
+<main>{% block content %}{% endblock %}</main>
+<footer><span>✦ RL Arena · CogniCare</span><span>Engagement games for supportive cognitive care · Not a diagnostic tool</span></footer>
+</div>
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+<script src="{% static 'js/script.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
