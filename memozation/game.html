@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>MemoZation Game</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="blur-page">
+  <button class="exitBtn" onclick="exitGame()">EXIT</button>
+
+<h1>MemoZation</h1>
+<p id="levelText" style="display:none;">
+  Level: <span id="level">1</span>
+</p>
+<!-- 🎨 PATTERN -->
+<div id="patternBox"></div>
+
+<!-- ❓ QUESTION -->
+<div id="questionBox"></div>
+
+<!-- ✍️ ANSWER (HIDDEN INITIALLY) -->
+<div id="answerSection" style="display:none;">
+  <input type="text" id="answerInput" placeholder="Enter answer">
+  <br><br>
+  <button onclick="submitAnswer()">SUBMIT</button>
+</div>
+
+<br><br>
+
+<!-- 🔴 START + DASHBOARD (WRAPPED PROPERLY) -->
+<div id="startSection">
+  <div class="btnGroup">
+    <button onclick="startLevel()">START GAME</button>
+    <button onclick="goDashboard()">DASHBOARD</button>
+  </div>
+</div>
+
+<!-- ❌ FAIL POPUP -->
+<div id="failPopup" class="popup">
+  <div class="popupContent">
+    <h2>LEVEL FAILED</h2>
+    <div class="popupButtons">
+      <button onclick="retryLevel()">TRY AGAIN</button>
+      <button onclick="goDashboard()">BACK</button>
+    </div>
+  </div>
+</div>
+<div id="exitPopup" class="popup">
+  <div class="popupContent">
+    <h2>EXIT GAME?</h2>
+    <div class="popupButtons">
+      <button onclick="confirmExit()">YES</button>
+      <button onclick="closeExit()">NO</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/game.js"></script>
+
+</body>
+
+</html>
